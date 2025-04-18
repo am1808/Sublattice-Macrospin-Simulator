@@ -10,25 +10,42 @@ class solver:
         param = self.param
 
         
+        # Compute fields
         k = np.float64((2 * param.Ku) / (param.mu0 * param.Ms**2))
         J = np.float64((4 * param.A0) / (param.mu0 * param.Ms**2 * param.l**2))
         H = np.float64(param.H / (param.mu0 * param.Ms))
 
+        # Compute time-dependent fields
         JJ = np.float64(Current.j(self, J, t0))
         kk = np.float64(Current.ku(self, k, t0))
         HH = np.float64(Current.H(self, H, t0))
-       
 
+        # Compute currents
+        Je_Chirp = Current.Je_Chirp(self, t0)
+        Je_SOT = Current.Je_SOT(self, t0) 
+        Je_SOT += Je_Chirp
+        param.SOT_pol = np.array(param.SOT_pol, dtype=np.float64)
+       
         # Ensure m1, m2 are double precision
         m1 = np.array(m1, dtype=np.float64)
         m2 = np.array(m2, dtype=np.float64)
+        
+        # SOT effective field
+        h_SOT = Je_SOT* (np.cross(m1,param.SOT_pol) + param.SOT_pol)
 
-        n = JJ * m2 + kk * (param.ani * m1) + HH - param.Demag * m1
+        # Temperature field
+        u_Temp = np.random.rand(3)
+        u_Temp = u_Temp/np.linalg.norm(u_Temp)
+        h_Temp = param.Temp_Ampl * u_Temp
+
+        # Effective field
+        n = JJ * m2 + kk * (param.ani * m1) + HH - param.Demag * m1 + h_SOT + h_Temp
+        # Precessional and damped dynamics
         pp = np.cross(m1, n)
         bb = np.cross(m1, pp)
 
         # LLG equation 
-        s = np.float64(-1.0*(param.g0 * param.mu0 * param.Ms) / (1 + param.a**2) * (pp + param.a * bb)) 
+        s = np.float64(-1.0*((param.g0 * param.mu0 * param.Ms) / (1 + param.a**2)) * (pp + param.a * bb)) 
         return s
 
     def Heun(self, m1, m2, t0):  # Heun Method

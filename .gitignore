@@ -1,0 +1,16 @@
+
+# output files
+*.dat
+
+# Log files
+*.log
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+
+# Temporary files
+__pycache__
