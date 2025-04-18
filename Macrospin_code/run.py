@@ -3,12 +3,15 @@ from conf import conFile
 from importdata import parse_arguments  # Import the argument parser
 import numpy as np 
 import os
+import platform
+from datetime import datetime
 
 class run:
 	def __init__(self): 
 		self.param = conFile()
 		self.update_parameters_from_args()  # Update parameters with parsed arguments
 		self.export_parameters_to_log()    # Export parameters to a log file
+		self.create_simulation_logfile()   # Create a simulation log file
 		self.solver = solver(self.param)
 		self.w = 100
 
@@ -38,6 +41,19 @@ class run:
 				else:
 					f.write(f"{key}: {value}\n")
 		print(f"Parameters exported to {os.path.abspath(log_file)}")
+
+	def create_simulation_logfile(self):
+		"""Create a log file to store simulation metadata."""
+		log_file = "simulation_metadata.log"
+		with open(log_file, "w") as f:
+			f.write("Simulation Metadata:\n")
+			f.write("====================\n")
+			f.write(f"Date of Simulation: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+			f.write(f"Time to set Simulation: {self.param.t} seconds\n")
+			f.write(f"Location of Simulation: {os.getcwd()}\n")
+			f.write(f"Executable Used: {os.path.basename(__file__)}\n")
+			f.write(f"Operating System: {platform.system()} {platform.release()} ({platform.version()})\n")
+		print(f"Simulation metadata exported to {os.path.abspath(log_file)}")
 
 	def RUN(self):
 		param = self.param
