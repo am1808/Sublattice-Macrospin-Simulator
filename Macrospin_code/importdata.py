@@ -60,6 +60,16 @@ def parse_arguments():
 	parser.add_argument("--SOT_pol", type=float, nargs=3, default=config.SOT_pol.tolist(), help="SOT polarization (default: %(default)s)")
 	parser.add_argument("--SOT_FL_q", type=float, default=config.SOT_FL_q, help="SOT FL strength (default: %(default)s)")
 
+	# Add Gaussian distribution argument
+	parser.add_argument(
+		"--gaussian",
+		type=str,
+		nargs=2,
+		action="append",
+		metavar=("PARAM", "RELATIVE_SIGMA"),
+		help="Apply Gaussian distribution to a parameter. Specify as '--gaussian PARAM RELATIVE_SIGMA', where RELATIVE_SIGMA is a fraction of the mean value."
+	)
+
 	args = parser.parse_args()
 	return args
 

@@ -20,13 +20,29 @@ class run:
 		args = parse_arguments()
 
 		# Update the parameters in the conFile instance with the parsed arguments
+		gaussian_params = []  # To store parameters with Gaussian distributions
 		for key, value in vars(args).items():
-			if hasattr(self.param, key):
+			if key == "gaussian" and value:
+				# Collect Gaussian parameters and their sigma values
+				for param, relative_sigma in value:
+					gaussian_params.append((param, float(relative_sigma)))
+			elif hasattr(self.param, key):
 				# Convert list back to NumPy array for specific parameters
 				if key in ["Hex_DC", "Hex_AC", "m1", "m2", "p", "Demag", "ani", "SOT_pol"]:
 					setattr(self.param, key, np.array(value, dtype=np.float64))
 				else:
 					setattr(self.param, key, value)
+
+		# Apply Gaussian distributions to specified parameters
+		rng = np.random.default_rng()  # Initialize random number generator
+		for param, relative_sigma in gaussian_params:
+			if hasattr(self.param, param):
+				mean_value = getattr(self.param, param)
+				sigma = mean_value * relative_sigma  # Calculate absolute sigma
+				new_value = rng.normal(loc=mean_value, scale=sigma)
+				setattr(self.param, param, new_value)
+			else:
+				print(f"Warning: Parameter '{param}' not found in conFile class.")
 		return
 
 	def export_parameters_to_log(self):
