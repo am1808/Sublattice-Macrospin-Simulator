@@ -31,7 +31,7 @@ class solver:
         m2 = np.array(m2, dtype=np.float64)
         
         # SOT effective field
-        h_SOT = Je_SOT* (np.cross(m1,param.SOT_pol) + param.SOT_pol)
+        h_SOT = Je_SOT* (np.cross(m1,param.SOT_pol) + param.SOT_FL_q*param.SOT_pol)
 
         # Temperature field
         u_Temp = np.random.rand(3)
