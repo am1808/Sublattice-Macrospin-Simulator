@@ -73,7 +73,7 @@ class output:
         ax.plot(data2[:,0]*1e12, data2[:,1], color='black', linestyle='dashed', label=r'$m_{2,x}$') 
         ax.plot(data2[:,0]*1e12, data2[:,2], color='blue', linestyle='dashed', label=r'$m_{2,y}$') 
         ax.plot(data2[:,0]*1e12, data2[:,3], color='red', linestyle='dashed', label=r'$m_{2,z}$') 
-        ax.vlines(x=100, ymin=-1.1, ymax=1.1, linestyles='dashed', colors='gray')
+        # ax.vlines(x=100, ymin=-1.1, ymax=1.1, linestyles='dashed', colors='gray')
         
         ax.yaxis.set_major_formatter(ScalarFormatter())
         # ax.minorticks_off()

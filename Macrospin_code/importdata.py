@@ -1,12 +1,23 @@
 import argparse
 import numpy as np
 from conf import conFile
+import shlex
+
+def comma_separated_floats(s):
+	try:
+		# Split the string on commas and convert each part to a float.
+		return [float(item) for item in s.split(',')]
+	except Exception as e:
+		raise argparse.ArgumentTypeError("Invalid array format. Use comma-separated floats, e.g., '1.0,2.0,3.0'.")
+
 
 def parse_arguments():
 	parser = argparse.ArgumentParser(description="Parse input parameters for the simulation.")
 
 	# Create an instance of conFile to access default values
 	config = conFile()
+
+	parser.add_argument("--input-file", type=str, help="Path to file containing input parameters.")
 
 	# Dynamically add arguments for each parameter in conFile
 	parser.add_argument("--g0", type=float, default=config.g0, help="mu0 * gamma (default: %(default)s)")
@@ -31,21 +42,26 @@ def parse_arguments():
 	parser.add_argument("--Fr", type=float, default=config.Fr, help="Frequency (default: %(default)s)")
 	parser.add_argument("--T", type=float, default=config.T, help="Period (default: %(default)s)")
 	parser.add_argument("--phase", type=float, default=config.phase, help="Phase (default: %(default)s)")
+	parser.add_argument("--flagShape", action="store_true", default=config.flagShape, help="Shape flag (default: %(default)s)")
 	parser.add_argument("--flag0", action="store_true", default=config.flag0, help="Temperature flag (default: %(default)s)")
 	parser.add_argument("--flag1", action="store_true", default=config.flag1, help="Current flag (default: %(default)s)")
 	parser.add_argument("--flag2", action="store_true", default=config.flag2, help="Ku(t) flag (default: %(default)s)")
 	parser.add_argument("--flag3", action="store_true", default=config.flag3, help="H(t) flag (default: %(default)s)")
 	parser.add_argument("--flag4", action="store_true", default=config.flag4, help="Activate Chirp signal (default: %(default)s)")
 	parser.add_argument("--flag5", action="store_true", default=config.flag5, help="Activate SOT (default: %(default)s)")
-	parser.add_argument("--Hex_DC", type=float, nargs=3, default=config.Hex_DC.tolist(), help="Ex Field Components (DC) (default: %(default)s)")
-	parser.add_argument("--Hex_AC", type=float, nargs=3, default=config.Hex_AC.tolist(), help="Ex Field Components (AC) (default: %(default)s)")
-	parser.add_argument("--m1", type=float, nargs=3, default=config.m1.tolist(), help="Initial condition m1 (default: %(default)s)")
-	parser.add_argument("--m2", type=float, nargs=3, default=config.m2.tolist(), help="Initial condition m2 (default: %(default)s)")
-	parser.add_argument("--p", type=float, nargs=3, default=config.p.tolist(), help="Polarizer (default: %(default)s)")
-	parser.add_argument("--Demag", type=float, nargs=3, default=config.Demag.tolist(), help="Demag tensor (default: %(default)s)")
-	parser.add_argument("--ani", type=float, nargs=3, default=config.ani.tolist(), help="Anisotropy (default: %(default)s)")
+	parser.add_argument("--flagSinc", action="store_true", default=config.flagSinc, help="Sinc flag (default: %(default)s)")
+	parser.add_argument("--Hex_DC", type=comma_separated_floats, default=config.Hex_DC.tolist(), help="Ex Field Components (DC) (default: %(default)s)")
+	parser.add_argument("--Hex_AC", type=comma_separated_floats, default=config.Hex_AC.tolist(), help="Ex Field Components (AC) (default: %(default)s)")
+	parser.add_argument("--m1", type=comma_separated_floats, default=config.m1.tolist(), help="Initial condition m1 (default: %(default)s)")
+	parser.add_argument("--m2", type=comma_separated_floats, default=config.m2.tolist(), help="Initial condition m2 (default: %(default)s)")
+	parser.add_argument("--p", type=comma_separated_floats, default=config.p.tolist(), help="Polarizer (default: %(default)s)")
+	parser.add_argument("--Demag", type=comma_separated_floats, default=config.Demag.tolist(), help="Demag tensor (default: %(default)s)")
+	parser.add_argument("--ani", type=comma_separated_floats, default=config.ani.tolist(), help="Anisotropy easy axis(default: %(default)s)")
+	parser.add_argument("--ani_AC", type=comma_separated_floats, default=config.ani.tolist(), help="AC Anisotropy easy axis(default: %(default)s)")
 	parser.add_argument("--A0_Amp", type=float, default=config.A0_Amp, help="J Amp (default: %(default)s)")
-	parser.add_argument("--Ku_Amp", type=float, default=config.Ku_Amp, help="Ku Amp (default: %(default)s)")
+	parser.add_argument("--Ku_Amp", type=float, default=config.Ku_Amp, help="Ku(t) Amp (default: %(default)s)")
+	parser.add_argument("--Ku_Fr", type=float, default=config.Ku_Fr, help="Ku(t) frequency (default: %(default)s)")
+	parser.add_argument("--Ku_phase", type=float, default=config.Ku_phase, help="Ku(t) phase  (default: %(default)s)")
 	parser.add_argument("--H_Amp", type=float, default=config.H_Amp, help="Field Amp (default: %(default)s)")
 	parser.add_argument("--t_chirp", type=float, default=config.t_chirp, help="Duration of Chirp pulse (default: %(default)s)")
 	parser.add_argument("--Chirp_Amp", type=float, default=config.Chirp_Amp, help="Amplitude of Chirp signal (default: %(default)s)")
@@ -57,7 +73,7 @@ def parse_arguments():
 	parser.add_argument("--SOT_AC_Amp", type=float, default=config.SOT_AC_Amp, help="SOT AC current amplitude (default: %(default)s)")
 	parser.add_argument("--SOT_AC_Fr", type=float, default=config.SOT_AC_Fr, help="SOT AC current frequency (default: %(default)s)")
 	parser.add_argument("--SOT_AC_phase", type=float, default=config.SOT_AC_phase, help="SOT AC current phase (default: %(default)s)")
-	parser.add_argument("--SOT_pol", type=float, nargs=3, default=config.SOT_pol.tolist(), help="SOT polarization (default: %(default)s)")
+	parser.add_argument("--SOT_pol", type=comma_separated_floats, default=config.SOT_pol.tolist(), help="SOT polarization (default: %(default)s)")
 	parser.add_argument("--SOT_FL_q", type=float, default=config.SOT_FL_q, help="SOT FL strength (default: %(default)s)")
 
 	# Add Gaussian distribution argument
@@ -70,7 +86,17 @@ def parse_arguments():
 		help="Apply Gaussian distribution to a parameter. Specify as '--gaussian PARAM RELATIVE_SIGMA', where RELATIVE_SIGMA is a fraction of the mean value."
 	)
 
-	args = parser.parse_args()
+	args, remaining = parser.parse_known_args()
+
+	if args.input_file:
+		with open(args.input_file, "r") as f:
+			# Use shlex.split to properly handle quotes and whitespace.
+			file_args = shlex.split(f.read())
+		# Re-parse with both file arguments and any remaining command-line arguments so command-line options override what’s in the file
+		args = parser.parse_args(file_args + remaining)
+	else:
+		args = parser.parse_args()
+
 	return args
 
 if __name__ == "__main__":

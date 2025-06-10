@@ -8,27 +8,31 @@ class solver:
 
     def mxx(self, m1, m2, t0): 
         param = self.param
+       
+        # Ensure m1, m2 are double precision
+        m1 = np.array(m1, dtype=np.float64)
+        m2 = np.array(m2, dtype=np.float64)
 
-        
         # Compute fields
         k = np.float64((2 * param.Ku) / (param.mu0 * param.Ms**2))
         J = np.float64((4 * param.A0) / (param.mu0 * param.Ms**2 * param.l**2))
         H = np.float64(param.H / (param.mu0 * param.Ms))
 
+        Sinc_signal = Current.sinc_signal(self, param.Fr, t0)
+        H = H + np.float64(param.H_Amp / (param.mu0 * param.Ms)) * Sinc_signal * param.Hex_AC
+
         # Compute time-dependent fields
         JJ = np.float64(Current.j(self, J, t0))
-        kk = np.float64(Current.ku(self, k, t0))
+        kk = np.float64(Current.ku(self, 0.0, t0))
         HH = np.float64(Current.H(self, H, t0))
+
+        h_ani = k * np.dot(param.ani,m1) * param.ani + kk * np.dot(param.ani_AC,m1) * param.ani_AC
 
         # Compute currents
         Je_Chirp = Current.Je_Chirp(self, t0)
         Je_SOT = Current.Je_SOT(self, t0) 
         Je_SOT += Je_Chirp
         param.SOT_pol = np.array(param.SOT_pol, dtype=np.float64)
-       
-        # Ensure m1, m2 are double precision
-        m1 = np.array(m1, dtype=np.float64)
-        m2 = np.array(m2, dtype=np.float64)
         
         # SOT effective field
         h_SOT = Je_SOT* (np.cross(m1,param.SOT_pol) + param.SOT_FL_q*param.SOT_pol)
@@ -39,18 +43,18 @@ class solver:
         h_Temp = param.Temp_Ampl * u_Temp
 
         # Effective field
-        n = JJ * m2 + kk * (param.ani * m1) + HH - param.Demag * m1 + h_SOT + h_Temp
+        n = JJ * m2 + h_ani + HH - param.Demag * m1 + h_SOT + h_Temp
         # Precessional and damped dynamics
         pp = np.cross(m1, n)
         bb = np.cross(m1, pp)
 
         # LLG equation 
-        s = np.float64(-1.0*((param.g0 * param.mu0 * param.Ms) / (1 + param.a**2)) * (pp + param.a * bb)) 
+        s = np.float64(-1.0*((param.g0 * param.Ms) / (1 + param.a**2)) * (pp + param.a * bb)) 
         return s
 
     def Heun(self, m1, m2, t0):  # Heun Method
         param = self.param
-        h = np.float64(param.h * (param.mu0 * param.g0 * param.Ms))
+        h = np.float64(param.h)
 
         m1 = np.array(m1, dtype=np.float64)
         m2 = np.array(m2, dtype=np.float64)
@@ -72,7 +76,7 @@ class solver:
 
     def RK4(self, m1, m2, t0):  # Runge-Kutta 4th Order Method
         param = self.param
-        h = np.float64(param.h * (param.mu0 * param.g0 * param.Ms))
+        h = np.float64(param.h)
 
         m1 = np.array(m1, dtype=np.float64)
         m2 = np.array(m2, dtype=np.float64)

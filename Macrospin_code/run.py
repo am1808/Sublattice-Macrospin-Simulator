@@ -10,10 +10,20 @@ class run:
 	def __init__(self): 
 		self.param = conFile()
 		self.update_parameters_from_args()  # Update parameters with parsed arguments
+		self.calculate_area_and_volume()  # Calculate area and volume
 		self.export_parameters_to_log()    # Export parameters to a log file
 		self.create_simulation_logfile()   # Create a simulation log file
 		self.solver = solver(self.param)
-		self.w = 100
+		self.w = 1
+
+	def calculate_area_and_volume(self):
+		# Calculate area and volume based on the shape flag
+		self.param.Area = self.param.Lx * self.param.Ly
+		if self.param.flagShape:
+			self.param.Area = 0.25 * np.pi * self.param.Area
+			print(f"Area calculation: {self.param.Area:.3e} nm^2")
+		# Calculate volume
+		self.param.Vol = self.param.Area * self.param.Lz	
 
 	def update_parameters_from_args(self):
 		# Parse command-line arguments
@@ -28,7 +38,7 @@ class run:
 					gaussian_params.append((param, float(relative_sigma)))
 			elif hasattr(self.param, key):
 				# Convert list back to NumPy array for specific parameters
-				if key in ["Hex_DC", "Hex_AC", "m1", "m2", "p", "Demag", "ani", "SOT_pol"]:
+				if key in ["Hex_DC", "Hex_AC", "m1", "m2", "p", "Demag", "ani", "ani_AC", "SOT_pol"]:
 					setattr(self.param, key, np.array(value, dtype=np.float64))
 				else:
 					setattr(self.param, key, value)
@@ -84,8 +94,8 @@ class run:
 		w = self.w
 
 		# Dimensionless time calculation
-		tnew = np.float64(param.t * (param.g0  * param.Ms))  
-		hh = np.float64(param.h * (param.g0  * param.Ms))  
+		tnew = np.float64(param.t)  
+		hh = np.float64(param.h)  
 		k = int(tnew / hh)
 		pp = int(k / w)
 
@@ -102,15 +112,15 @@ class run:
 			t00 = np.float64(t0 / (param.g0 * param.Ms))  
 
 			if j == 0:
-				Results1[j, :] = [t00, m1[0], m1[1], m1[2]]
-				Results2[j, :] = [t00, m2[0], m2[1], m2[2]]
+				Results1[j, :] = [t0, m1[0], m1[1], m1[2]]
+				Results2[j, :] = [t0, m2[0], m2[1], m2[2]]
 
 			# Call the solver method 
 			m1, m2 = solver.Heun(m1, m2, t0)
 
 			if i == w:
-				Results1[n, :] = [t00, m1[0], m1[1], m1[2]]
-				Results2[n, :] = [t00, m2[0], m2[1], m2[2]]
+				Results1[n, :] = [t0, m1[0], m1[1], m1[2]]
+				Results2[n, :] = [t0, m2[0], m2[1], m2[2]]
 				
 				# print(f'Spin 1 : t= {t00:.16E}, mx= {m1[0]:.16f}, my={m1[1]:.16f}, mz={m1[2]:.16f}')
 				# print(f'Spin 2 : t= {t00:.16E}, mx= {m2[0]:.16f}, my={m2[1]:.16f}, mz={m2[2]:.16f}')
