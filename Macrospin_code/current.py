@@ -77,3 +77,30 @@ class Current:
 			Je_SOT = np.float64(Prefactor * (self.param.SOT_DC_Amp + self.param.SOT_AC_Amp * np.sin(omega * t0 + self.param.SOT_AC_phase*np.pi/180.0)))
 
 		return Je_SOT
+
+	def Temperature_dependence_parameters(self, Msat, Jex, Kani, t0):
+		"""Temperature dependence of parameters"""
+		if self.param.flagTempVarying:
+			# Temperature dependence of parameters 
+			omega = np.float64(2 * np.pi *self.param.Fr)
+			Tc = 700.0  # Critical temperature
+			T_phase = 300.0
+			T_Amp = 50.0
+			T_of_t_old = T_phase +  T_Amp * np.sin(omega * (t0-self.param.h)) # Previous time step temperature
+			T_of_t = T_phase +  T_Amp * np.sin(omega * t0)
+			m_exp = 0.5
+			meq = np.power( (1.0 - T_of_t/Tc), m_exp ) # Temperature dependent magnetisation
+			A0_exp = 1.77
+			A0_sign = 1.0
+			Ku_exp = 3.0
+			DeltaT = np.sign(T_of_t - T_of_t_old) * 25.0
+			if T_of_t < T_phase + DeltaT:
+				A0_exp = 2.65
+				A0_sign = -1.0
+				Ku_exp = 3.0
+			Jex = A0_sign * Jex * np.power(meq, A0_exp)
+			Kani = Kani * np.power(meq, Ku_exp)
+			Msat = self.param.Ms * meq  # Temperature dependente saturation magnetisation
+			print(f'Time: {t0:.2e} s, Temp: {T_of_t:.2f} K, meq: {meq:.2f}, Msat: {Msat:.2e}, Jex: {Jex:.2e}, Kani: {Kani:.2e}')
+
+		return Msat, Jex, Kani

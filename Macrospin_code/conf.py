@@ -15,7 +15,7 @@ class conFile() :
 		self.t  = 0.500e-9 								# Total time   
 		self.Lx = 100.0e-9 								# Dimension along x
 		self.Ly = 100.0e-9 								# Dimension along y
-		self.Lz = 1.0e-9 * 0.25							# Dimension along z
+		self.Lz = 1.0e-9       							# Dimension along z
 		self.Area = self.Lx * self.Ly 					# Device Area
 		self.Vol = self.Area * self.Lz 					# Device volume
 		self.Temp=300.0 								# Temperature in K
@@ -37,14 +37,15 @@ class conFile() :
 		self.flag4 = False                              # Flag to activate Chirp signal
 		self.flag5 = False                              # Flag to activate SOT
 		self.flagSinc = False                              # Flag to activate sinc signal
+		self.flagTempVarying = False                              # Flag to activate temperature varying parameters
 		self.Hex_DC = np.array([0.0,0.0,0.0]) 			# Ex Field Components (DC)
 		self.Hex_AC = np.array([0.0,0.0,0.0]) 			# Ex Field Components (AC)	
 		self.m1 = np.array([ -0.3785504696409115, 0.0026628502418170, 0.9255768207789320])			# Initial Condition m_1
 		self.m2 = np.array([0.3785504696409115, 0.0026628502418170, -0.9255768207789320])				# Initial Condition m_2
 		self.p  = np.array([0.0,0.0,0.0])				# Polarizer
 		self.Demag = 0*np.array([0.0259,0.0259,0.9482]) # Demag Tensor 
-		self.ani =  np.array([0.0,0.0,1.0])				# Anisotropy easy axis
-		self.ani_AC =  np.array([0.0,0.0,1.0])				# Anisotropy AC easy axis
+		self.u_ani =  np.array([0.0,0.0,1.0])				# Anisotropy easy axis
+		self.u_ani_AC =  np.array([0.0,0.0,1.0])				# Anisotropy AC easy axis
 		self.A0_Amp = 0.0e-12							# J  Amp
 		self.Ku_Amp = 0.0e6								# Ku(t) Amp
 		self.Ku_Fr = 0.0e9								# Ku(t) Frequency

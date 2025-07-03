@@ -38,7 +38,7 @@ class run:
 					gaussian_params.append((param, float(relative_sigma)))
 			elif hasattr(self.param, key):
 				# Convert list back to NumPy array for specific parameters
-				if key in ["Hex_DC", "Hex_AC", "m1", "m2", "p", "Demag", "ani", "ani_AC", "SOT_pol"]:
+				if key in ["Hex_DC", "Hex_AC", "m1", "m2", "p", "Demag", "u_ani", "u_ani_AC", "SOT_pol"]:
 					setattr(self.param, key, np.array(value, dtype=np.float64))
 				else:
 					setattr(self.param, key, value)
