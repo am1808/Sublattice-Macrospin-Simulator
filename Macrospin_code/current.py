@@ -85,9 +85,9 @@ class Current:
 			omega = np.float64(2 * np.pi *self.param.Fr)
 			Tc = 700.0  # Critical temperature
 			T_phase = 300.0
-			T_Amp = 50.0
-			T_of_t_old = T_phase +  T_Amp * np.sin(omega * (t0-self.param.h)) # Previous time step temperature
-			T_of_t = T_phase +  T_Amp * np.sin(omega * t0)
+			T_Amp = self.param.Temp
+			T_of_t_old = T_phase +  T_Amp * np.sin(omega * (t0-self.param.h) + self.param.phase*np.pi/180.0) # Previous time step temperature
+			T_of_t = T_phase +  T_Amp * np.sin(omega * t0 + self.param.phase*np.pi/180.0)
 			m_exp = 0.5
 			meq = np.power( (1.0 - T_of_t/Tc), m_exp ) # Temperature dependent magnetisation
 			A0_exp = 1.77
@@ -101,6 +101,6 @@ class Current:
 			Jex = A0_sign * Jex * np.power(meq, A0_exp)
 			Kani = Kani * np.power(meq, Ku_exp)
 			Msat = self.param.Ms * meq  # Temperature dependente saturation magnetisation
-			print(f'Time: {t0:.2e} s, Temp: {T_of_t:.2f} K, meq: {meq:.2f}, Msat: {Msat:.2e}, Jex: {Jex:.2e}, Kani: {Kani:.2e}')
+			print(f'Time: {t0:.2e} s, Tempold: {T_of_t_old:.2f} K , Temp: {T_of_t:.2f} K, meq: {meq:.2f}, Msat: {Msat:.2e}, Jex: {Jex:.2e}, Kani: {Kani:.2e}')
 
 		return Msat, Jex, Kani

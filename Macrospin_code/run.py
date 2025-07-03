@@ -103,6 +103,8 @@ class run:
 		if param.flag0 and 0 < param.Temp:
 			print('Computing temperature standard deviation ...')
 			param.Temp_Ampl = np.float64(np.sqrt((2 * param.kB * param.a * param.Temp)/(param.mu0 * param.g0 * param.Ms * param.Vol * param.h)) / param.Ms)
+		else:
+			param.Temp_Ampl = 0.0
 		print(f'Temperature is: {param.Temp:.3f} with a standard deviation of {param.Temp_Ampl:.3e}')
 		
 		Results1 = np.zeros((pp, 4), dtype=np.float64)
