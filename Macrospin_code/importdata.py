@@ -37,6 +37,7 @@ def parse_arguments():
 	parser.add_argument("--Ms", type=float, default=config.Ms, help="Saturation magnetization (default: %(default)s)")
 	parser.add_argument("--A0", type=float, default=config.A0, help="Homogeneous interlattice exchange (default: %(default)s)")
 	parser.add_argument("--Ku", type=float, default=config.Ku, help="Uniaxial anisotropy (default: %(default)s)")
+	parser.add_argument("--DMI_vec", type=comma_separated_floats, default=config.DMI_vec.tolist(), help="DMI vector (default: %(default)s)")
 	parser.add_argument("--l", type=float, default=config.l, help="Lattice constant (default: %(default)s)")
 	parser.add_argument("--H", type=float, default=config.H, help="Field (default: %(default)s)")
 	parser.add_argument("--Fr", type=float, default=config.Fr, help="Frequency (default: %(default)s)")

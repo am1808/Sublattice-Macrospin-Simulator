@@ -20,6 +20,7 @@ class solver:
 		K = np.float64((2 * K_T) / (param.mu0 * M_T**2))
 		J = np.float64((4 * J_T) / (param.mu0 * M_T**2 * param.l**2))
 		H = np.float64(param.H / (param.mu0 * M_T))
+		D0 = np.float64((4) / (param.mu0 * M_T**2 * param.l))
 
 		Sinc_signal = Current.sinc_signal(self, param.Fr, t0)
 		H = H + np.float64(param.H_Amp / (param.mu0 * M_T)) * Sinc_signal * param.Hex_AC
@@ -29,7 +30,14 @@ class solver:
 		kk = np.float64(Current.ku(self, K, t0))
 		HH = np.float64(Current.H(self, H, t0))
 
+		# Anisotropy field
 		h_ani = K * np.dot(param.u_ani,m1) * param.u_ani + kk * np.dot(param.u_ani_AC,m1) * param.u_ani_AC
+
+		# DMI field
+		h_DMI_x = (param.DMI_vec[2]*m2[1] - param.DMI_vec[1]*m2[2])
+		h_DMI_y = (param.DMI_vec[0]*m2[2] - param.DMI_vec[2]*m2[0])
+		h_DMI_z = (param.DMI_vec[1]*m2[0] - param.DMI_vec[0]*m2[1])
+		h_DMI = D0 * np.array([h_DMI_x, h_DMI_y, h_DMI_z], dtype=np.float64)
 
 		# Compute currents
 		Je_Chirp = Current.Je_Chirp(self, t0)
@@ -46,7 +54,7 @@ class solver:
 		h_Temp = param.Temp_Ampl * u_Temp
 
 		# Effective field
-		n = JJ * m2 + h_ani + HH - param.Demag * m1 + h_SOT + h_Temp
+		n = JJ * m2 + h_ani + h_DMI + HH - param.Demag * m1 + h_SOT + h_Temp
 		# Precessional and damped dynamics
 		pp = np.cross(m1, n)
 		bb = np.cross(m1, pp)
