@@ -6,7 +6,7 @@ class solver:
 		self.param = param
 		self.Current = Current()
 
-	def mxx(self, m1, m2, t0): 
+	def mxx(self, m1, m2, t0, sign=1): 
 		param = self.param
 	   
 		# Ensure m1, m2 are double precision
@@ -20,7 +20,8 @@ class solver:
 		K = np.float64((2 * K_T) / (param.mu0 * M_T**2))
 		J = np.float64((4 * J_T) / (param.mu0 * M_T**2 * param.l**2))
 		H = np.float64(param.H / (param.mu0 * M_T))
-		D0 = np.float64((4) / (param.mu0 * M_T**2 * param.l))
+		D0 = np.float64(sign*(4 * param.DMI) / (param.mu0 * M_T**2 * param.l))
+		RKKY2_0 = np.float64((2 * param.RKKY2) / (param.mu0 * M_T**2 * param.l))
 
 		Sinc_signal = Current.sinc_signal(self, param.Fr, t0)
 		H = H + np.float64(param.H_Amp / (param.mu0 * M_T)) * Sinc_signal * param.Hex_AC
@@ -33,11 +34,14 @@ class solver:
 		# Anisotropy field
 		h_ani = K * np.dot(param.u_ani,m1) * param.u_ani + kk * np.dot(param.u_ani_AC,m1) * param.u_ani_AC
 
-		# DMI field
+		# Intersublattice DMI field
 		h_DMI_x = (param.DMI_vec[2]*m2[1] - param.DMI_vec[1]*m2[2])
 		h_DMI_y = (param.DMI_vec[0]*m2[2] - param.DMI_vec[2]*m2[0])
 		h_DMI_z = (param.DMI_vec[1]*m2[0] - param.DMI_vec[0]*m2[1])
 		h_DMI = D0 * np.array([h_DMI_x, h_DMI_y, h_DMI_z], dtype=np.float64)
+
+		#2nd order RKKY field
+		h_rkky2 = np.array(RKKY2_0 * np.dot(m1, m2) * m2, dtype=np.float64)
 
 		# Compute currents
 		Je_Chirp = Current.Je_Chirp(self, t0)
@@ -54,7 +58,7 @@ class solver:
 		h_Temp = param.Temp_Ampl * u_Temp
 
 		# Effective field
-		n = JJ * m2 + h_ani + h_DMI + HH - param.Demag * m1 + h_SOT + h_Temp
+		n = JJ * m2 + h_ani + h_DMI + h_rkky2 + HH - param.Demag * m1 + h_SOT + h_Temp
 		# Precessional and damped dynamics
 		pp = np.cross(m1, n)
 		bb = np.cross(m1, pp)
@@ -71,7 +75,7 @@ class solver:
 		m2 = np.array(m2, dtype=np.float64)
 
 		xx = self.mxx(m1, m2, t0)
-		yy = self.mxx(m2, m1, t0)
+		yy = self.mxx(m2, m1, t0, sign=-1)
 
 		mp1 = m1 + h * xx  # Predictor
 		mp2 = m2 + h * yy
@@ -79,7 +83,7 @@ class solver:
 		mp2 /= np.linalg.norm(mp2)
 
 		m1 = m1 + 0.5 * h * (xx + self.mxx(mp1, mp2, t0))  
-		m2 = m2 + 0.5 * h * (yy + self.mxx(mp2, mp1, t0))  # Corrector
+		m2 = m2 + 0.5 * h * (yy + self.mxx(mp2, mp1, t0, sign=-1))  # Corrector
 		m1 /= np.linalg.norm(m1)
 		m2 /= np.linalg.norm(m2)
 
@@ -97,10 +101,10 @@ class solver:
 		k3 = self.mxx(m1 + 0.5 * h * k2, m2 + 0.5 * h * k2, t0 + 0.5 * h) 
 		k4 = self.mxx(m1 + h * k3, m2 + h * k3, t0 + h) 
 
-		p1 = self.mxx(m2, m1, t0) 
-		p2 = self.mxx(m2 + 0.5 * h * p1, m1 + 0.5 * h * p1, t0 + 0.5 * h) 
-		p3 = self.mxx(m2 + 0.5 * h * p2, m1 + 0.5 * h * p2, t0 + 0.5 * h) 
-		p4 = self.mxx(m2 + h * p3, m1 + h * p3, t0 + h) 
+		p1 = self.mxx(m2, m1, t0, sign=-1) 
+		p2 = self.mxx(m2 + 0.5 * h * p1, m1 + 0.5 * h * p1, t0 + 0.5 * h, sign=-1) 
+		p3 = self.mxx(m2 + 0.5 * h * p2, m1 + 0.5 * h * p2, t0 + 0.5 * h, sign=-1) 
+		p4 = self.mxx(m2 + h * p3, m1 + h * p3, t0 + h, sign=-1) 
 
 		m1 = m1 + 0.166 * h * (k1 + 2 * k2 + 2 * k3 + k4)
 		m2 = m2 + 0.166 * h * (p1 + 2 * p2 + 2 * p3 + p4)

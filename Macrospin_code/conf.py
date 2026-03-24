@@ -24,7 +24,9 @@ class conFile() :
 		self.Ms = 566e3 								# Saturation Magnetization
 		self.A0 = -0.248e-12							# Homogeneous interlattice exchange
 		self.Ku = 28.3e3	   							# Uniaxial Anisotropy
-		self.DMI_vec =  np.array([0.0,0.0,1.0])*1e-4	# DMI vector
+		self.DMI = 0.0e3	   							# DMI strength in J/m2
+		self.DMI_vec =  np.array([0.0,0.0,1.0])     	# DMI unit vector
+		self.RKKY2 = 0.0e3	   							# 2nd oder RKKY interaction strength in J/m2
 		self.l = 0.5e-9									# lattice constant
 		self.H = 0.0e-3									# Field
 		self.Fr =1.0e9								    # Frequency 

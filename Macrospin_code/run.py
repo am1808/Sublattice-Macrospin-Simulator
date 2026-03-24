@@ -85,7 +85,7 @@ class run:
 		param = self.param
 		solver = self.solver
 
-		
+		# Normalize initial conditions	
 		m1 = np.array(param.m1, dtype=np.float64)/np.linalg.norm(param.m1)
 		m2 = np.array(param.m2, dtype=np.float64)/np.linalg.norm(param.m2)
 		t0 = np.float64(0.0)
