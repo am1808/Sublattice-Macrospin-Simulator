@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np 
 from matplotlib.ticker import ScalarFormatter
-import scienceplots
+# import scienceplots
 import os
 import glob
 
